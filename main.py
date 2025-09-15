@@ -18,6 +18,13 @@ dotenv.load_dotenv()
 
 class Lynx(commands.Bot):
     async def setup_hook(self) -> None:
+        guild_id_str: str = os.getenv("DEBUG_GUILD_ID")
+        guild_id: int = int(guild_id_str) if guild_id_str else None
+
+        # 登録されているコマンドを削除(グローバルとギルドで重複するため)
+        if guild_id:
+            await self.tree.sync()
+            logger.info("グローバルコマンドをリセットしました。")
 
         # 非extensionなcogの読み込み
         await self.add_cog(AdminToolsCog(self))
@@ -36,9 +43,6 @@ class Lynx(commands.Bot):
                 cog_file: str = f"cogs.{filename[:-3]}"
                 await self.load_extension(cog_file)
                 logger.info("%sを読み込みました。", cog_file)
-
-        guild_id_str: str = os.getenv("DEBUG_GUILD_ID")
-        guild_id: int = int(guild_id_str) if guild_id_str else None
 
         await self.sync_command(guild_id)
 
